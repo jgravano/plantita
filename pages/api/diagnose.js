@@ -22,7 +22,7 @@ export default async function handler(req, res) {
           content:
             'Sos un bot experto en botánica. Vas a diagnosticar enfermedades o problemas en plantas a partir de imágenes y contexto textual.',
         },
-        {
+        { 
           role: 'user',
           content: [
             {

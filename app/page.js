@@ -1,10 +1,12 @@
+'use client';
+
+import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 import axios from 'axios';
-import Head from 'next/head';
 import { useState } from 'react';
 import DiagnosisResult from '../components/DiagnosisResult';
 import ImageDropzone from '../components/ImageDropzone';
 
-export default function Home() {
+export default function HomePage() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [userInput, setUserInput] = useState('');
   const [diagnosis, setDiagnosis] = useState(null);
@@ -49,14 +51,41 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-plantita-50 to-plantita-100">
-      <Head>
-        <title>Plantita - Diagnóstico de Plantas con IA</title>
-        <meta
-          name="description"
-          content="Diagnostica problemas de tus plantas con inteligencia artificial"
-        />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+      {/* Header con autenticación */}
+      <header className="bg-white shadow-sm border-b border-plantita-200">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-plantita-500 rounded-full flex items-center justify-center">
+              <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fillRule="evenodd"
+                  d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+            <h1 className="text-xl font-bold text-plantita-800">Plantita</h1>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button className="text-plantita-600 hover:text-plantita-700 font-medium">
+                  Iniciar sesión
+                </button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button className="bg-plantita-600 text-white px-4 py-2 rounded-md hover:bg-plantita-700 font-medium">
+                  Registrarse
+                </button>
+              </SignUpButton>
+            </SignedOut>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
+          </div>
+        </div>
+      </header>
 
       <main className="container mx-auto px-4 py-8">
         {/* Header */}
