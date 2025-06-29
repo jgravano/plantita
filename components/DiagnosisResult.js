@@ -1,3 +1,4 @@
+import { SignUpButton, SignedOut } from '@clerk/nextjs';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -36,6 +37,9 @@ const DiagnosisResult = ({ diagnosis, isLoading, error }) => {
 
   if (diagnosis) {
     const diagnosisText = diagnosis.diagnosis || diagnosis;
+    const isAuthenticated = diagnosis.isAuthenticated;
+    const detectedSpecies = diagnosis.detectedSpecies;
+
     return (
       <div className="bg-white rounded-lg shadow-md p-6 border border-plantita-200">
         <div className="flex items-center space-x-3 mb-4">
@@ -46,11 +50,50 @@ const DiagnosisResult = ({ diagnosis, isLoading, error }) => {
           </div>
           <h3 className="text-lg font-semibold text-plantita-800">Diagnóstico de tu planta</h3>
         </div>
+
+        {/* Especie detectada */}
+        {detectedSpecies && detectedSpecies !== 'No identificada' && (
+          <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+            <div className="flex items-center space-x-2">
+              <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span className="text-green-800 font-medium">
+                Especie detectada: {detectedSpecies}
+              </span>
+            </div>
+          </div>
+        )}
+
         <div className="bg-plantita-50 rounded-lg p-4">
           <article className="prose prose-plantita max-w-none">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{diagnosisText}</ReactMarkdown>
           </article>
         </div>
+
+        {/* CTA para usuarios anónimos */}
+        <SignedOut>
+          <div className="mt-6 p-4 bg-gradient-to-r from-plantita-50 to-plantita-100 rounded-lg border border-plantita-200">
+            <div className="text-center">
+              <p className="text-plantita-800 font-medium mb-3">
+                ¿Querés guardar este diagnóstico y hacerle seguimiento a esta planta?
+              </p>
+              <SignUpButton mode="modal">
+                <button className="bg-plantita-600 text-white px-6 py-2 rounded-md hover:bg-plantita-700 font-medium transition-colors">
+                  Crear cuenta gratis
+                </button>
+              </SignUpButton>
+              <p className="text-xs text-plantita-600 mt-2">
+                Guardá tus diagnósticos, seguí la evolución de tus plantas y más
+              </p>
+            </div>
+          </div>
+        </SignedOut>
+
         <div className="mt-6 pt-4 border-t border-plantita-200">
           <p className="text-xs text-gray-500 text-center">
             💡 Este diagnóstico es informativo. Para casos graves, consulta con un especialista.

@@ -1,17 +1,43 @@
 'use client';
 
-import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
+import {
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+  useUser,
+} from '@clerk/nextjs';
 import axios from 'axios';
-import { useState } from 'react';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import DiagnosisResult from '../components/DiagnosisResult';
 import ImageDropzone from '../components/ImageDropzone';
 
 export default function HomePage() {
+  const { user, isSignedIn } = useUser();
   const [selectedImage, setSelectedImage] = useState(null);
   const [userInput, setUserInput] = useState('');
   const [diagnosis, setDiagnosis] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedPlant, setSelectedPlant] = useState(null);
+
+  // Verificar si hay una planta seleccionada para diagnóstico
+  useEffect(() => {
+    const savedPlant = localStorage.getItem('selectedPlantForDiagnosis');
+    if (savedPlant) {
+      try {
+        const plant = JSON.parse(savedPlant);
+        setSelectedPlant(plant);
+        // Limpiar el localStorage después de usarlo
+        localStorage.removeItem('selectedPlantForDiagnosis');
+      } catch (err) {
+        console.error('Error parsing saved plant:', err);
+        localStorage.removeItem('selectedPlantForDiagnosis');
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,9 +55,13 @@ export default function HomePage() {
       const response = await axios.post('/api/diagnose', {
         base64Image: selectedImage,
         userInput: userInput.trim(),
+        userId: isSignedIn ? user.id : null,
+        plantId: selectedPlant?.id || null, // Incluir el ID de la planta si está seleccionada
       });
 
       setDiagnosis(response.data);
+      // Limpiar la planta seleccionada después del diagnóstico
+      setSelectedPlant(null);
     } catch (err) {
       console.error('Error al diagnosticar:', err);
       setError(
@@ -81,6 +111,12 @@ export default function HomePage() {
               </SignUpButton>
             </SignedOut>
             <SignedIn>
+              <Link
+                href="/plantas"
+                className="text-plantita-600 hover:text-plantita-700 font-medium"
+              >
+                Mis Plantas
+              </Link>
               <UserButton />
             </SignedIn>
           </div>
@@ -118,6 +154,51 @@ export default function HomePage() {
                 </h2>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* Indicador de planta seleccionada */}
+                  {selectedPlant && (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                            <svg
+                              className="w-5 h-5 text-green-600"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </div>
+                          <div>
+                            <p className="text-green-800 font-medium">
+                              Diagnóstico para: {selectedPlant.name}
+                            </p>
+                            <p className="text-green-600 text-sm">
+                              El nuevo diagnóstico se agregará al historial de esta planta
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedPlant(null)}
+                          className="text-green-600 hover:text-green-700"
+                          title="Cancelar selección"
+                        >
+                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                              fillRule="evenodd"
+                              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Selector de imagen */}
                   <div>
                     <label className="block text-sm font-medium text-plantita-700 mb-2">
